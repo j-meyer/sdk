@@ -36,6 +36,7 @@ const defaultState = {
   bearing: 0,
   metadata: defaultMetadata(),
   sources: {},
+  graticule: false,
   layers: [],
 };
 
@@ -521,6 +522,8 @@ export default function MapReducer(state = defaultState, action) {
       return updateMetadata(state, action);
     case MAP.UPDATE_SOURCE:
       return updateSource(state, action);
+    case MAP.TOGGLE_GRATICULE:
+      return Object.assign({}, state, { graticule: !state.graticule });
     default:
       return state;
   }

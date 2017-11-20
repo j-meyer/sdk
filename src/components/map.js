@@ -59,7 +59,13 @@ import SelectInteraction from 'ol/interaction/select';
 import Style from 'ol/style/style';
 import SpriteStyle from '../style/sprite';
 
+import Graticule from 'ol/graticule';
+import Stroke from 'ol/style/stroke';
+import Fill from 'ol/style/fill';
+import Text from 'ol/style/text';
+
 import AttributionControl from 'ol/control/attribution';
+import ScaleLine from 'ol/control/scaleline';
 
 import LoadingStrategy from 'ol/loadingstrategy';
 
@@ -568,6 +574,64 @@ export class Map extends React.Component {
       this.map.once('postcompose', (evt) => { evt.context.canvas.toBlob(this.props.onExportImage); }, this);
       this.map.renderSync();
     }
+
+    if (nextProps.map.graticule) {
+      const lonFormatter = function(lon) {
+        let formattedLon = Math.abs(Math.round(lon * 100) / 100);
+        formattedLon += "°00'";
+        formattedLon += (lon < 0) ? 'W' : ((lon > 0) ? 'E' : '');
+        return formattedLon;
+      };
+
+      const latFormatter = function(lat) {
+        let formattedLat = Math.abs(Math.round(lat * 100) / 100);
+        formattedLat += "°00'";
+        formattedLat += (lat < 0) ? 'S' : ((lat > 0) ? 'N' : '');
+        return formattedLat;
+      };
+
+
+      if (!this.graticule) {
+        this.graticule = new Graticule({
+          // the style to use for the lines, optional.
+          strokeStyle: new Stroke({
+            color: 'rgba(255,120,0,0.9)',
+            width: 2,
+            lineDash: [0.5, 4]
+          }),
+          showLabels: true,
+          lonLabelFormatter: lonFormatter,
+          latLabelFormatter: latFormatter,
+          //label positions
+          lonLabelPosition: 0.05,
+          latLabelPosition: 0.95,
+
+          //style for longitude label
+          lonLabelStyle: new Text({
+            font: '10px Verdana',
+            fill: new Fill({
+              color: 'rgba(0,0,0,1)'
+            })
+          }),
+
+          //style for latitude label
+          latLabelStyle: new Text({
+            font: '10px Verdana',
+            offsetX: -2,
+            textBaseline: 'bottom',
+            fill: new Fill({
+              color: 'rgba(0,0,0,1)'
+            })
+          })
+        });
+      }
+      this.graticule.setMap(this.map);
+    } else {
+      if (this.graticule){
+        this.graticule.setMap(null);
+      }
+    }
+
 
     // This should always return false to keep
     // render() from being called.
@@ -1154,9 +1218,16 @@ export class Map extends React.Component {
       center = Proj.transform(this.props.map.center, 'EPSG:4326', map_proj);
     }
 
+    let controls = [new AttributionControl()];
+    if (this.props.scales) {
+      this.props.scales.forEach((config) => {
+        controls.push(new ScaleLine(config));
+      });
+    }
+
     // initialize the map.
     this.map = new OlMap({
-      controls: [new AttributionControl()],
+      controls: controls,
       target: this.mapdiv,
       logo: false,
       view: new View({
@@ -1171,6 +1242,10 @@ export class Map extends React.Component {
     this.map.on('moveend', () => {
       this.props.setView(this.map.getView());
     });
+
+    if (this.props.pointermove) {
+      this.map.on('pointermove', this.props.pointermove);
+    }
 
     // when the map is clicked, handle the event.
     this.map.on('singleclick', (evt) => {
@@ -1224,6 +1299,7 @@ export class Map extends React.Component {
       this.updatePopups();
     });
 
+    if (this.props.graticule)
 
     // check for any interactions
     if (this.props.drawing && this.props.drawing.interaction) {

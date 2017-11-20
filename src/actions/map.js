@@ -402,6 +402,12 @@ export function updateSource(sourceName, update) {
   };
 }
 
+export function toggleGraticule() {
+  return {
+    type: MAP.TOGGLE_GRATICULE
+  };
+}
+
 /** Set the time of the map.
  *
  *  @param {string} time An ISO date time string.
