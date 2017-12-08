@@ -31,6 +31,14 @@ class SdkClusterSource extends ClusterSource {
     const cluster = super.createCluster(features);
     // add "point_count" to the features
     const n_features = cluster.get('features').length;
+
+    if (n_features === 1) {
+      const props = features[0].getProperties();
+      for (const key in props) {
+        cluster.set(key, props[key]);
+      }
+    }
+
     cluster.set('point_count', n_features);
     cluster.set('point_count_abbreviated', n_features);
     return cluster;
