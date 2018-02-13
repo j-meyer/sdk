@@ -738,7 +738,44 @@ export class Map extends React.Component {
       for (let l = 0, ll = layers.length; l < ll; ++l) {
         const layer = layers[l];
         if (!layer.filter || layer.filter({properties: feature.getProperties()})) {
-          if (!spriteOptions[layer.id].rotation || (spriteOptions[layer.id].rotation && !spriteOptions[layer.id].rotation.property)) {
+          //This only supports color stops as a property, the other interpolated colors will not work
+          if (spriteOptions[layer.id].color && typeof(spriteOptions[layer.id].color) === 'object' && spriteOptions[layer.id].color.property) {
+            if (!styleCache[layer.id]) {
+              styleCache[layer.id] = {};
+            }
+
+            const rotationAttribute = spriteOptions[layer.id].rotation.property;
+            const colorAttribute = spriteOptions[layer.id].color.property;
+            const rotation = feature.get(rotationAttribute);
+            const allColors = spriteOptions[layer.id].color.stops;
+            const colorNonconverted = feature.get(colorAttribute);
+            let color = spriteOptions[layer.id].color.default;
+
+            for (var i = 0; i < allColors.length; ++i) {
+              if (allColors[i][0] === colorNonconverted) {
+                color = allColors[i][1];
+                break;
+              }
+            }
+
+            const lookupKey = rotation + color.join(',');
+
+            if (!styleCache[layer.id][lookupKey]) {
+              const options = jsonClone(layer.metadata['bnd:animate-sprite'])
+              options.rotation = rotation;
+              options.color = color;
+
+              const sprite = new SpriteStyle(options);
+              const style = new Style({image: sprite});
+              this.map.on('postcompose', (e) => {
+                sprite.update(e);
+              });
+              styleCache[layer.id][lookupKey] = style;
+            }
+            return styleCache[layer.id][lookupKey];
+
+          }
+          else if (!spriteOptions[layer.id].rotation || (spriteOptions[layer.id].rotation && !spriteOptions[layer.id].rotation.property)) {
             if (!styleCache[layer.id]) {
               const sprite = new SpriteStyle(spriteOptions[layer.id]);
               styleCache[layer.id] = new Style({image: sprite});
