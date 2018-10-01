@@ -43,30 +43,62 @@ class SdkSpriteStyle extends IconStyle {
       };
     }
   }
+
   drawImage_() {
     const ctx = this.getImage().getContext("2d");
-    ctx.clearRect(0, 0, this.width, this.height);
-    ctx.drawImage(
-      this.img_,
-      this.offset[0],
-      this.offset[1],
-      this.width,
-      this.height,
-      0,
-      0,
-      this.width,
-      this.height
-    );
+
     if (this.color) {
-      const data = ctx.getImageData(0, 0, this.width, this.height);
-      for (let i = 0, length = data.data.length; i < length; i += 4) {
-        data.data[i] = this.color[0];
-        data.data[i + 1] = this.color[1];
-        data.data[i + 2] = this.color[2];
-      }
-      ctx.putImageData(data, 0, 0);
+      const canvas = document.createElement('canvas');
+      canvas.width = this.width;
+      canvas.height = this.height;
+      const context = canvas.getContext('2d');
+
+      context.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+      context.shadowBlur = 10;
+      context.shadowOffsetX = 0;
+      context.shadowOffsetY = 0;
+
+      context.clearRect(0, 0, this.width, this.height);
+      context.drawImage(
+        this.img_,
+        this.offset[0],
+        this.offset[1],
+        this.width,
+        this.height,
+        0,
+        0,
+        this.width,
+        this.height
+      );
+
+      ctx.clearRect(0, 0, this.width, this.height);
+      ctx.drawImage(
+        canvas,
+        0,
+        0,
+        this.width,
+        this.height,
+        0,
+        0,
+        this.width,
+        this.height
+      );
+    } else {
+      ctx.clearRect(0, 0, this.width, this.height);
+      ctx.drawImage(
+        this.img_,
+        this.offset[0],
+        this.offset[1],
+        this.width,
+        this.height,
+        0,
+        0,
+        this.width,
+        this.height
+      );
     }
   }
+
   update(e) {
     const step = e.frameState.time / this.frameRate;
     const offset = [(0 + (Math.trunc(step)%this.spriteCount)) * this.width, 0];
