@@ -65,6 +65,7 @@ import Fill from 'ol/style/fill';
 import Text from 'ol/style/text';
 
 import AttributionControl from 'ol/control/attribution';
+import MousePosition from 'ol/control/mouseposition';
 import ScaleLine from 'ol/control/scaleline';
 
 import LoadingStrategy from 'ol/loadingstrategy';
@@ -1260,6 +1261,9 @@ export class Map extends React.Component {
       this.props.scales.forEach((config) => {
         controls.push(new ScaleLine(config));
       });
+    }
+    if (this.props.mousePosition) {
+      controls.push(new MousePosition(this.props.mousePosition));
     }
 
     // initialize the map.

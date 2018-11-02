@@ -48,55 +48,28 @@ class SdkSpriteStyle extends IconStyle {
     const ctx = this.getImage().getContext("2d");
 
     if (this.color) {
-      const canvas = document.createElement('canvas');
-      canvas.width = this.width;
-      canvas.height = this.height;
-      const context = canvas.getContext('2d');
-
-      context.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
-      context.shadowBlur = 10;
-      context.shadowOffsetX = 0;
-      context.shadowOffsetY = 0;
-
-      context.clearRect(0, 0, this.width, this.height);
-      context.drawImage(
-        this.img_,
-        this.offset[0],
-        this.offset[1],
-        this.width,
-        this.height,
-        0,
-        0,
-        this.width,
-        this.height
-      );
-
-      ctx.clearRect(0, 0, this.width, this.height);
-      ctx.drawImage(
-        canvas,
-        0,
-        0,
-        this.width,
-        this.height,
-        0,
-        0,
-        this.width,
-        this.height
-      );
-    } else {
-      ctx.clearRect(0, 0, this.width, this.height);
-      ctx.drawImage(
-        this.img_,
-        this.offset[0],
-        this.offset[1],
-        this.width,
-        this.height,
-        0,
-        0,
-        this.width,
-        this.height
-      );
+      if (Array.isArray(this.color)) {
+        ctx.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+      } else {
+        ctx.shadowColor = this.color;
+      }
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     }
+
+    ctx.clearRect(0, 0, this.width, this.height);
+    ctx.drawImage(
+      this.img_,
+      this.offset[0],
+      this.offset[1],
+      this.width,
+      this.height,
+      0,
+      0,
+      this.width,
+      this.height
+    );
   }
 
   update(e) {
