@@ -43,8 +43,21 @@ class SdkSpriteStyle extends IconStyle {
       };
     }
   }
+
   drawImage_() {
     const ctx = this.getImage().getContext("2d");
+
+    if (this.color) {
+      if (Array.isArray(this.color)) {
+        ctx.shadowColor = `rgb(${this.color[0]}, ${this.color[1]}, ${this.color[2]})`;
+      } else {
+        ctx.shadowColor = this.color;
+      }
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    }
+
     ctx.clearRect(0, 0, this.width, this.height);
     ctx.drawImage(
       this.img_,
@@ -57,16 +70,8 @@ class SdkSpriteStyle extends IconStyle {
       this.width,
       this.height
     );
-    if (this.color) {
-      const data = ctx.getImageData(0, 0, this.width, this.height);
-      for (let i = 0, length = data.data.length; i < length; i += 4) {
-        data.data[i] = this.color[0];
-        data.data[i + 1] = this.color[1];
-        data.data[i + 2] = this.color[2];
-      }
-      ctx.putImageData(data, 0, 0);
-    }
   }
+
   update(e) {
     const step = e.frameState.time / this.frameRate;
     const offset = [(0 + (Math.trunc(step)%this.spriteCount)) * this.width, 0];
